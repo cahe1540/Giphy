@@ -2796,7 +2796,17 @@ exports.default = Gifs;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.findEndOfPage = findEndOfPage;
+exports.newGifSearch = newGifSearch;
 exports.generateImages = exports.eraseImages = exports.addImage = void 0;
+
+var _gifModel = _interopRequireDefault(require("./gifModel.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
 var addImage = function addImage(src) {
   if (!(src === undefined)) {
@@ -2825,10 +2835,109 @@ var generateImages = function generateImages(state) {
     addImage(state.gifs.imgUrl[i]);
     state.imagesLoaded++;
   }
-};
+}; //event handler for scroll action
+
 
 exports.generateImages = generateImages;
-},{}],"src/js/controller.js":[function(require,module,exports) {
+
+function findEndOfPage(state) {
+  return /*#__PURE__*/function () {
+    var _fn = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(e) {
+      var bottomOfPage;
+      return regeneratorRuntime.wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              bottomOfPage = document.body.offsetHeight;
+
+              if (!(window.innerHeight + window.pageYOffset >= bottomOfPage)) {
+                _context.next = 10;
+                break;
+              }
+
+              if (!(state.imagesLoaded < state.gifs.imgUrl.length)) {
+                _context.next = 6;
+                break;
+              }
+
+              generateImages(state); //otherwise, load more images
+
+              _context.next = 10;
+              break;
+
+            case 6:
+              state.page++;
+              _context.next = 9;
+              return state.gifs.fetchQuery('cartoon', state.page * 50);
+
+            case 9:
+              generateImages(state);
+
+            case 10:
+            case "end":
+              return _context.stop();
+          }
+        }
+      }, _callee);
+    }));
+
+    function fn(_x) {
+      return _fn.apply(this, arguments);
+    }
+
+    return fn;
+  }();
+} //event handler for search button
+
+
+function newGifSearch(state) {
+  return /*#__PURE__*/function () {
+    var _fn2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(e) {
+      var newQuery, children;
+      return regeneratorRuntime.wrap(function _callee2$(_context2) {
+        while (1) {
+          switch (_context2.prev = _context2.next) {
+            case 0:
+              //prevent a default behavior
+              e.preventDefault(); //get the search value
+
+              newQuery = state.dom.searchArea.value; //get new gif urls
+
+              if (!(newQuery !== '')) {
+                _context2.next = 10;
+                break;
+              }
+
+              //remove all old images
+              children = state.dom.gifArea.children;
+              eraseImages(state.dom.gifArea, children); //reset num gifs loaded
+
+              state.imagesLoaded = 0; //replace gif data
+
+              state.gifs = new _gifModel.default();
+              _context2.next = 9;
+              return state.gifs.fetchQuery(newQuery, 0);
+
+            case 9:
+              //render new gifs
+              generateImages(state);
+
+            case 10:
+            case "end":
+              return _context2.stop();
+          }
+        }
+      }, _callee2);
+    }));
+
+    function fn(_x2) {
+      return _fn2.apply(this, arguments);
+    }
+
+    return fn;
+  }();
+}
+},{"./gifModel.js":"src/js/gifModel.js"}],"src/js/controller.js":[function(require,module,exports) {
 "use strict";
 
 var _domElements = _interopRequireDefault(require("./domElements.js"));
@@ -2857,7 +2966,7 @@ var state = {
 
 function init() {
   return _init.apply(this, arguments);
-} //event handler for scroll action
+} //state to hold all variables
 
 
 function _init() {
@@ -2871,9 +2980,9 @@ function _init() {
 
           case 2:
             //event listener for scrolling down
-            window.addEventListener('scroll', findEndOfPage); //event listener for serchbar
+            window.addEventListener('scroll', view.findEndOfPage.bind(event, state)()); //event listener for serchbar
 
-            state.dom.searchBtn.addEventListener('click', newGifSearch); //generate default set on first visit 
+            state.dom.searchBtn.addEventListener('click', view.newGifSearch.bind(event, state)()); //generate default set on first visit 
 
             view.generateImages(state);
 
@@ -2885,99 +2994,6 @@ function _init() {
     }, _callee);
   }));
   return _init.apply(this, arguments);
-}
-
-function findEndOfPage(_x) {
-  return _findEndOfPage.apply(this, arguments);
-} //event handler for search button
-
-
-function _findEndOfPage() {
-  _findEndOfPage = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(e) {
-    var bottomOfPage;
-    return regeneratorRuntime.wrap(function _callee2$(_context2) {
-      while (1) {
-        switch (_context2.prev = _context2.next) {
-          case 0:
-            bottomOfPage = document.body.offsetHeight;
-
-            if (!(window.innerHeight + window.pageYOffset >= bottomOfPage)) {
-              _context2.next = 10;
-              break;
-            }
-
-            if (!(state.imagesLoaded < state.gifs.imgUrl.length)) {
-              _context2.next = 6;
-              break;
-            }
-
-            view.generateImages(state); //otherwise, load more images
-
-            _context2.next = 10;
-            break;
-
-          case 6:
-            state.page++;
-            _context2.next = 9;
-            return state.gifs.fetchQuery('cartoon', state.page * 50);
-
-          case 9:
-            view.generateImages(state);
-
-          case 10:
-          case "end":
-            return _context2.stop();
-        }
-      }
-    }, _callee2);
-  }));
-  return _findEndOfPage.apply(this, arguments);
-}
-
-function newGifSearch(_x2) {
-  return _newGifSearch.apply(this, arguments);
-} //state to hold all variables
-
-
-function _newGifSearch() {
-  _newGifSearch = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3(e) {
-    var newQuery, children;
-    return regeneratorRuntime.wrap(function _callee3$(_context3) {
-      while (1) {
-        switch (_context3.prev = _context3.next) {
-          case 0:
-            //prevent a default behavior
-            e.preventDefault(); //get the search value
-
-            newQuery = state.dom.searchArea.value; //get new gif urls
-
-            if (!(newQuery !== '')) {
-              _context3.next = 10;
-              break;
-            }
-
-            //remove all old images
-            children = state.dom.gifArea.children;
-            view.eraseImages(state.dom.gifArea, children); //reset num gifs loaded
-
-            state.imagesLoaded = 0; //replace gif data
-
-            state.gifs = new _gifModel.default();
-            _context3.next = 9;
-            return state.gifs.fetchQuery(newQuery, 0);
-
-          case 9:
-            //render new gifs
-            view.generateImages(state);
-
-          case 10:
-          case "end":
-            return _context3.stop();
-        }
-      }
-    }, _callee3);
-  }));
-  return _newGifSearch.apply(this, arguments);
 }
 
 init();
@@ -3009,7 +3025,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51923" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52857" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
