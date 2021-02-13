@@ -2,7 +2,7 @@ import domElements from "./domElements.js";
 import Gifs from "./gifModel.js";
 import * as view from "./viewController.js";
 
-//state 
+//state i
 let state = {
     imagesLoaded: 0,
     page : 0,
