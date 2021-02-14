@@ -56,3 +56,9 @@ a {
   width: 18rem;
   margin: 1.5rem;
 }
+
+.error-message {
+  font-size: 2.2rem;
+  position: relative;
+  top: 5rem;
+}

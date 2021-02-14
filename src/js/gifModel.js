@@ -20,8 +20,13 @@ export default class Gifs {
     }
 
     generateUsefulFields(){
+       
+       //generate URLs for each gif
        this.res.data.data.forEach(cur => {
            this.imgUrl.push(cur.images.fixed_height.url);
        });
+       
+       //resultsFound = true if search returned results, else false
+       this.resultsFound = this.imgUrl.length > 0 ? true: false;
     }
 }
