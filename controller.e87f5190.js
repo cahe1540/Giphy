@@ -133,6 +133,7 @@ var domElements = function domElements() {
   this.gifArea = document.querySelector('.Gifs');
   this.searchArea = document.querySelector('.text-bar');
   this.searchBtn = document.querySelector('.btn');
+  this.loader = document.querySelector('.loader-icon');
 };
 
 exports.default = domElements;
@@ -2780,9 +2781,12 @@ var Gifs = /*#__PURE__*/function () {
     value: function generateUsefulFields() {
       var _this = this;
 
+      //generate URLs for each gif
       this.res.data.data.forEach(function (cur) {
         _this.imgUrl.push(cur.images.fixed_height.url);
-      });
+      }); //resultsFound = true if search returned results, else false
+
+      this.resultsFound = this.imgUrl.length > 0 ? true : false;
     }
   }]);
 
@@ -2798,9 +2802,11 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.findEndOfPage = findEndOfPage;
 exports.newGifSearch = newGifSearch;
-exports.generateImages = exports.eraseImages = exports.addImage = void 0;
+exports.generateImages = exports.renderSearchFailMessage = exports.eraseImages = exports.addImage = void 0;
 
 var _gifModel = _interopRequireDefault(require("./gifModel.js"));
+
+var _domElements = _interopRequireDefault(require("./domElements.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -2808,13 +2814,16 @@ function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
+var domEls = new _domElements.default(); //add a single image to image area
+
 var addImage = function addImage(src) {
+  //only do so if img exists
   if (!(src === undefined)) {
     var img = document.createElement('img');
     img.src = src;
-    document.querySelector('.Gifs').appendChild(img);
+    domEls.gifArea.appendChild(img);
   }
-}; //remove all rendered images
+}; //remove all rendered images or messages
 
 
 exports.addImage = addImage;
@@ -2823,17 +2832,32 @@ var eraseImages = function eraseImages(parent, children) {
   for (var i = children.length - 1; i >= 0; i--) {
     parent.removeChild(children[i]);
   }
-};
+}; //tell user search returned no results
+
 
 exports.eraseImages = eraseImages;
 
-var generateImages = function generateImages(state) {
-  //load 9 more images
-  var limit = state.imagesLoaded + 9;
+var renderSearchFailMessage = function renderSearchFailMessage() {
+  var message = 'Search returned no results...';
+  var errorMsg = document.createElement('div');
+  errorMsg.classList.add('error-message');
+  errorMsg.innerHTML = message;
+  domEls.gifArea.appendChild(errorMsg);
+};
 
-  for (var i = state.imagesLoaded; i < limit; i++) {
-    addImage(state.gifs.imgUrl[i]);
-    state.imagesLoaded++;
+exports.renderSearchFailMessage = renderSearchFailMessage;
+
+var generateImages = function generateImages(state) {
+  if (state.gifs.resultsFound) {
+    //load 9 more images
+    var limit = state.imagesLoaded + 9;
+
+    for (var i = state.imagesLoaded; i < limit; i++) {
+      addImage(state.gifs.imgUrl[i]);
+      state.imagesLoaded++;
+    }
+  } else {
+    renderSearchFailMessage();
   }
 }; //event handler for scroll action
 
@@ -2937,7 +2961,7 @@ function newGifSearch(state) {
     return fn;
   }();
 }
-},{"./gifModel.js":"src/js/gifModel.js"}],"src/js/controller.js":[function(require,module,exports) {
+},{"./gifModel.js":"src/js/gifModel.js","./domElements.js":"src/js/domElements.js"}],"src/js/controller.js":[function(require,module,exports) {
 "use strict";
 
 var _domElements = _interopRequireDefault(require("./domElements.js"));
@@ -2956,7 +2980,7 @@ function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
-//state 
+//state i
 var state = {
   imagesLoaded: 0,
   page: 0,
@@ -3025,7 +3049,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52857" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63539" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
